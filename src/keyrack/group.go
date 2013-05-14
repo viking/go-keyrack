@@ -12,20 +12,22 @@ func NewGroup(id uint64, name string) (group *Group) {
   return
 }
 
-type GroupList []*Group
-
-func (list GroupList) Len() int {
-  return len([]*Group(list))
+type GroupList struct {
+  Groups []*Group
 }
 
-func (list GroupList) Less(i, j int) bool {
-  if list[i].Name == list[j].Name {
-    return list[i].Id < list[j].Id
+func (list *GroupList) Len() int {
+  return len(list.Groups)
+}
+
+func (list *GroupList) Less(i, j int) bool {
+  if list.Groups[i].Name == list.Groups[j].Name {
+    return list.Groups[i].Id < list.Groups[j].Id
   } else {
-    return list[i].Name < list[j].Name
+    return list.Groups[i].Name < list.Groups[j].Name
   }
 }
 
-func (list GroupList) Swap(i, j int) {
-  list[i], list[j] = list[j], list[i]
+func (list *GroupList) Swap(i, j int) {
+  list.Groups[i], list.Groups[j] = list.Groups[j], list.Groups[i]
 }
