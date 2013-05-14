@@ -3,12 +3,12 @@ package keyrack
 type Group struct {
   Id uint64
   Name string
-  Logins LoginList
+  Logins *LoginList
 }
 
 func NewGroup(id uint64, name string) (group *Group) {
   group = &Group{Id: id, Name: name}
-  group.Logins = make(LoginList, 0)
+  group.Logins = NewLoginList()
   return
 }
 

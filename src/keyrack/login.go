@@ -7,24 +7,32 @@ type Login struct {
   Password string
 }
 
-type LoginList []*Login
-
-func (list LoginList) Len() int {
-  return len([]*Login(list))
+type LoginList struct {
+  Logins []*Login
 }
 
-func (list LoginList) Less(i, j int) bool {
-  if list[i].Site == list[j].Site {
-    if list[i].Username == list[j].Username {
-      return list[i].Id < list[j].Id
+func NewLoginList() (list *LoginList) {
+  list = new(LoginList)
+  list.Logins = make([]*Login, 0)
+  return
+}
+
+func (list *LoginList) Len() int {
+  return len(list.Logins)
+}
+
+func (list *LoginList) Less(i, j int) bool {
+  if list.Logins[i].Site == list.Logins[j].Site {
+    if list.Logins[i].Username == list.Logins[j].Username {
+      return list.Logins[i].Id < list.Logins[j].Id
     } else {
-      return list[i].Username < list[j].Username
+      return list.Logins[i].Username < list.Logins[j].Username
     }
   } else {
-    return list[i].Site < list[j].Site
+    return list.Logins[i].Site < list.Logins[j].Site
   }
 }
 
-func (list LoginList) Swap(i, j int) {
-  list[i], list[j] = list[j], list[i]
+func (list *LoginList) Swap(i, j int) {
+  list.Logins[i], list.Logins[j] = list.Logins[j], list.Logins[i]
 }
