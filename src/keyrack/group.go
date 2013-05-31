@@ -12,6 +12,10 @@ func NewGroup(id uint64, name string) (group *Group) {
   return
 }
 
+func (group *Group) AddLogin(login *Login) {
+  group.Logins = append(group.Logins, login)
+}
+
 type GroupList []*Group
 
 func (list GroupList) Len() int {

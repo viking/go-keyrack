@@ -4,6 +4,17 @@ import (
   "testing"
 )
 
+func TestGroup_AddLogin(t *testing.T) {
+  group := NewGroup(1, "Foo")
+  login := &Login{1, "Twitter", "dude", "secret"}
+  group.AddLogin(login)
+  if len(group.Logins) != 1 {
+    t.Errorf("expected 1, got %d", len(group.Logins))
+  } else if login != group.Logins[0] {
+    t.Errorf("expected %v, got %v", login, group.Logins[0])
+  }
+}
+
 func TestGroupList_Len(t *testing.T) {
   list := GroupList{NewGroup(1, "Foo")}
   if list.Len() != 1 {
