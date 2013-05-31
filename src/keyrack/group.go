@@ -1,19 +1,31 @@
 package keyrack
 
+import "sync/atomic"
+
 type Group struct {
   Id uint64
   Name string
   Logins LoginList
+  Groups GroupList
+  Counter *uint64
 }
 
-func NewGroup(id uint64, name string) (group *Group) {
-  group = &Group{Id: id, Name: name}
+func NewGroup(id uint64, name string, counter *uint64) (group *Group) {
+  group = &Group{Id: id, Name: name, Counter: counter}
   group.Logins = make(LoginList, 0)
+  group.Groups = make(GroupList, 0)
   return
 }
 
-func (group *Group) AddLogin(login *Login) {
+func (group *Group) AddLogin(site, username, password string) {
+  login := &Login{Site: site, Username: username, Password: password}
+  login.Id = atomic.AddUint64(group.Counter, 1)
   group.Logins = append(group.Logins, login)
+}
+
+func (group *Group) AddGroup(name string) {
+  subgroup := NewGroup(atomic.AddUint64(group.Counter, 1), name, group.Counter)
+  group.Groups = append(group.Groups, subgroup)
 }
 
 type GroupList []*Group
