@@ -2,6 +2,8 @@ package keyrack
 
 import "sync/atomic"
 
+/* FIXME: Counter doesn't unserialize properly */
+
 type Group struct {
   Id uint64
   Name string
@@ -17,10 +19,18 @@ func NewGroup(id uint64, name string, counter *uint64) (group *Group) {
   return
 }
 
-func (group *Group) AddLogin(site, username, password string) {
-  login := &Login{Site: site, Username: username, Password: password}
-  login.Id = atomic.AddUint64(group.Counter, 1)
-  group.Logins = append(group.Logins, login)
+func (group *Group) AddLogin(site, username, password, master string) (err error) {
+  var (
+    id uint64
+    login *Login
+  )
+
+  id = atomic.AddUint64(group.Counter, 1)
+  login, err = NewLogin(id, site, username, password, master)
+  if err == nil {
+    group.Logins = append(group.Logins, login)
+  }
+  return
 }
 
 func (group *Group) AddGroup(name string) {

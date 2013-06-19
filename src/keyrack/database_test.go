@@ -62,7 +62,11 @@ func TestNewDatabase_LoadValidFile(t *testing.T) {
       t.Error(err)
       return
     }
-    db.Top.AddLogin("Twitter", "dude", "secret123")
+    err = db.Top.AddLogin("Twitter", "dude", "secret123", "supersecret")
+    if err != nil {
+      t.Error(err)
+      return
+    }
     err = db.Save("supersecret")
     if err != nil {
       t.Error(err)
@@ -93,7 +97,11 @@ func TestNewDatabase_WrongPassword(t *testing.T) {
       t.Error(err)
       return
     }
-    db.Top.AddLogin("Twitter", "dude", "secret123")
+    err = db.Top.AddLogin("Twitter", "dude", "secret123", "supersecret")
+    if err != nil {
+      t.Error(err)
+      return
+    }
     err = db.Save("supersecret")
     if err != nil {
       t.Error(err)
@@ -119,7 +127,11 @@ func TestDatabase_Save_WrongPassword(t *testing.T) {
       t.Error(err)
       return
     }
-    db.Top.AddLogin("Twitter", "dude", "secret123")
+    err = db.Top.AddLogin("Twitter", "dude", "secret123", "supersecret")
+    if err != nil {
+      t.Error(err)
+      return
+    }
     err = db.Save("wrong")
     if err == nil {
       t.Error("expected error, got none")

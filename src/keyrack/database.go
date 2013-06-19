@@ -67,13 +67,13 @@ func (db *Database) Save(password string) (err error) {
     plaintext = append(plaintext, make([]byte, aes.BlockSize - blen)...)
   }
 
+  /* Encrypt the plaintext */
   var block cipher.Block
   block, err = aes.NewCipher(db.key)
   if err != nil {
     return
   }
 
-  /* Encrypt the plaintext */
   ciphertext := make([]byte, len(plaintext))
   mode := cipher.NewCBCEncrypter(block, db.iv)
   mode.CryptBlocks(ciphertext, plaintext)

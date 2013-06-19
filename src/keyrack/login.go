@@ -4,7 +4,22 @@ type Login struct {
   Id uint64
   Site string
   Username string
-  Password string
+  Password *Secret
+}
+
+func NewLogin(id uint64, site, username, password, master string) (login *Login, err error) {
+  login = &Login{Id: id, Site: site, Username: username}
+  login.Password, err = NewSecret([]byte(password), master)
+  return
+}
+
+func (login *Login) PasswordString(master string) (password string, err error) {
+  var message []byte
+  message, err = login.Password.Message(master)
+  if err == nil {
+    password = string(message)
+  }
+  return
 }
 
 type LoginList []*Login

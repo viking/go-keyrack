@@ -5,9 +5,21 @@ import (
 )
 
 func TestGroup_AddLogin(t *testing.T) {
-  counter := uint64(1)
-  group := NewGroup(1, "Foo", &counter)
-  group.AddLogin("Twitter", "dude", "secret")
+  var (
+    counter uint64
+    group *Group
+    login *Login
+    password string
+    err error
+  )
+
+  counter = uint64(1)
+  group = NewGroup(1, "Foo", &counter)
+  err = group.AddLogin("Twitter", "dude", "secret", "foo")
+  if err != nil {
+    t.Fatal(err)
+  }
+
   if len(group.Logins) != 1 {
     t.Errorf("expected 1, got %d", len(group.Logins))
   } else {
@@ -15,7 +27,7 @@ func TestGroup_AddLogin(t *testing.T) {
       t.Errorf("expected %v, got %v", 2, counter)
     }
 
-    login := group.Logins[0]
+    login = group.Logins[0]
     if login.Id != 2 {
       t.Errorf("expected %v, got %v", 2, login.Id)
     }
@@ -25,8 +37,12 @@ func TestGroup_AddLogin(t *testing.T) {
     if login.Username != "dude" {
       t.Errorf("expected %v, got %v", "dude", login.Username)
     }
-    if login.Password != "secret" {
-      t.Errorf("expected %v, got %v", "secret", login.Password)
+    password, err = login.PasswordString("foo")
+    if err != nil {
+      t.Error(err)
+    }
+    if password != "secret" {
+      t.Errorf("expected %v, got %v", "secret", password)
     }
   }
 }
