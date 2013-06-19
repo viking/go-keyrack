@@ -26,3 +26,22 @@ func TestSecret_Message(t *testing.T) {
     t.Errorf("expected %v, got %v", message, result)
   }
 }
+
+func TestSecret_Message_WrongPassword(t *testing.T) {
+  var (
+    secret *Secret
+    message []byte
+    err error
+  )
+
+  message = []byte("secret")
+  secret, err = NewSecret(message, "password")
+  if err != nil {
+    t.Error(err)
+  }
+
+  _, err = secret.Message("wrong")
+  if err == nil {
+    t.Error("expected an error, but there wasn't one")
+  }
+}
