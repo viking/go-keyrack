@@ -78,19 +78,21 @@ func NewSecret(message []byte, password string) (s *Secret, err error) {
   return
 }
 
-func (s *Secret) Message(password string) (message []byte, err error) {
-  if len(s.Ciphertext) % aes.BlockSize != 0 {
-    err = fmt.Errorf("invalid ciphertext")
-    return
-  }
-
-  /* Verify HMAC */
+func (s *Secret) IsPasswordValid(password string) bool {
   mac := hmac.New(sha256.New, []byte(password))
   mac.Write(s.Salt)
   mac.Write(s.IV)
   sum := mac.Sum(nil)
-  if !bytes.Equal(s.Sum, sum) {
+  return bytes.Equal(s.Sum, sum)
+}
+
+func (s *Secret) Message(password string) (message []byte, err error) {
+  if !s.IsPasswordValid(password) {
     err = fmt.Errorf("invalid password")
+    return
+  }
+  if len(s.Ciphertext) % aes.BlockSize != 0 {
+    err = fmt.Errorf("invalid ciphertext")
     return
   }
 
