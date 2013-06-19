@@ -62,9 +62,9 @@ func (db *Database) Save(password string) (err error) {
   }
 
   /* Pad plaintext if necessary */
-  padlen := len(plaintext) % aes.BlockSize
-  if padlen > 0 {
-    plaintext = append(plaintext, make([]byte, padlen)...)
+  blen := len(plaintext) % aes.BlockSize
+  if blen > 0 {
+    plaintext = append(plaintext, make([]byte, aes.BlockSize - blen)...)
   }
 
   var block cipher.Block
