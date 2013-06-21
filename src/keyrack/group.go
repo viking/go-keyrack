@@ -1,32 +1,22 @@
 package keyrack
 
-import "sync/atomic"
-
-/* FIXME: Counter doesn't unserialize properly */
-
 type Group struct {
-  Id uint64
   Name string
   Logins LoginList
   Groups GroupList
-  Counter *uint64
 }
 
-func NewGroup(id uint64, name string, counter *uint64) (group *Group) {
-  group = &Group{Id: id, Name: name, Counter: counter}
+func NewGroup(name string) (group *Group) {
+  group = &Group{Name: name}
   group.Logins = make(LoginList, 0)
   group.Groups = make(GroupList, 0)
   return
 }
 
 func (group *Group) AddLogin(site, username, password, master string) (err error) {
-  var (
-    id uint64
-    login *Login
-  )
+  var login *Login
 
-  id = atomic.AddUint64(group.Counter, 1)
-  login, err = NewLogin(id, site, username, password, master)
+  login, err = NewLogin(site, username, password, master)
   if err == nil {
     group.Logins = append(group.Logins, login)
   }
@@ -34,7 +24,7 @@ func (group *Group) AddLogin(site, username, password, master string) (err error
 }
 
 func (group *Group) AddGroup(name string) {
-  subgroup := NewGroup(atomic.AddUint64(group.Counter, 1), name, group.Counter)
+  subgroup := NewGroup(name)
   group.Groups = append(group.Groups, subgroup)
 }
 
@@ -45,11 +35,7 @@ func (list GroupList) Len() int {
 }
 
 func (list GroupList) Less(i, j int) bool {
-  if list[i].Name == list[j].Name {
-    return list[i].Id < list[j].Id
-  } else {
-    return list[i].Name < list[j].Name
-  }
+  return list[i].Name < list[j].Name
 }
 
 func (list GroupList) Swap(i, j int) {

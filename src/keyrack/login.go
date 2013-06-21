@@ -1,14 +1,13 @@
 package keyrack
 
 type Login struct {
-  Id uint64
   Site string
   Username string
   Password *Secret
 }
 
-func NewLogin(id uint64, site, username, password, master string) (login *Login, err error) {
-  login = &Login{Id: id, Site: site, Username: username}
+func NewLogin(site, username, password, master string) (login *Login, err error) {
+  login = &Login{Site: site, Username: username}
   login.Password, err = NewSecret([]byte(password), master)
   return
 }
@@ -30,11 +29,7 @@ func (list LoginList) Len() int {
 
 func (list LoginList) Less(i, j int) bool {
   if list[i].Site == list[j].Site {
-    if list[i].Username == list[j].Username {
-      return list[i].Id < list[j].Id
-    } else {
-      return list[i].Username < list[j].Username
-    }
+    return list[i].Username < list[j].Username
   } else {
     return list[i].Site < list[j].Site
   }

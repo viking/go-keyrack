@@ -13,12 +13,11 @@ type Database struct {
   Data *Secret
   top *Group
   mutex sync.Mutex
-  counter uint64
 }
 
 func NewDatabase() (db *Database) {
-  db = &Database{Version: 1, counter: 2}
-  db.top = NewGroup(1, "Top", &db.counter)
+  db = &Database{Version: 1}
+  db.top = NewGroup("Top")
   return
 }
 
