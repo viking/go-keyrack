@@ -1,5 +1,7 @@
 package keyrack
 
+import "fmt"
+
 type Group struct {
   Name string
   Logins LoginList
@@ -16,6 +18,14 @@ func NewGroup(name string) (group *Group) {
 func (group *Group) AddLogin(site, username, password, master string) (err error) {
   var login *Login
 
+  // First check to see if there is another login with the same site/username
+  for _, login = range group.Logins {
+    if login.Site == site && login.Username == username {
+      err = fmt.Errorf("there is already a login with the same site/username")
+      return
+    }
+  }
+
   login, err = NewLogin(site, username, password, master)
   if err == nil {
     group.Logins = append(group.Logins, login)
@@ -23,9 +33,19 @@ func (group *Group) AddLogin(site, username, password, master string) (err error
   return
 }
 
-func (group *Group) AddGroup(name string) {
-  subgroup := NewGroup(name)
+func (group *Group) AddGroup(name string) (err error) {
+  var subgroup *Group
+
+  for _, subgroup = range group.Groups {
+    if subgroup.Name == name {
+      err = fmt.Errorf("there is already a group with the same name")
+      return
+    }
+  }
+
+  subgroup = NewGroup(name)
   group.Groups = append(group.Groups, subgroup)
+  return
 }
 
 type GroupList []*Group

@@ -38,6 +38,26 @@ func TestGroup_AddLogin(t *testing.T) {
   }
 }
 
+func TestGroup_AddLogin_Duplicate(t *testing.T) {
+  var (
+    group *Group
+    err error
+  )
+
+  group = NewGroup("Foo")
+  err = group.AddLogin("Twitter", "dude", "secret", "foo")
+  if err != nil {
+    t.Fatal(err)
+  }
+  err = group.AddLogin("Twitter", "dude", "secret", "foo")
+  if err == nil {
+    t.Error("expected an error, but there wasn't one")
+  }
+  if len(group.Logins) != 1 {
+    t.Errorf("expected 1, got %d", len(group.Logins))
+  }
+}
+
 func TestGroup_AddGroup(t *testing.T) {
   group := NewGroup("Foo")
   group.AddGroup("Bar")
@@ -48,6 +68,21 @@ func TestGroup_AddGroup(t *testing.T) {
     if subgroup.Name != "Bar" {
       t.Errorf("expected %v, got %v", "Bar", subgroup.Name)
     }
+  }
+}
+
+func TestGroup_AddGroup_Duplicate(t *testing.T) {
+  group := NewGroup("Foo")
+  err := group.AddGroup("Bar")
+  if err != nil {
+    t.Error(err)
+  }
+  err = group.AddGroup("Bar")
+  if err == nil {
+    t.Error("expected an error, but there wasn't one")
+  }
+  if len(group.Groups) != 1 {
+    t.Errorf("expected 1, got %d", len(group.Groups))
   }
 }
 
