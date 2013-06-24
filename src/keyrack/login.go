@@ -17,6 +17,11 @@ func (login *Login) Password() string {
   return login.password
 }
 
+func (login *Login) SetPassword(password string) {
+  login.password = password
+  login.Data = nil
+}
+
 func (login *Login) Encrypt(key []byte) (err error) {
   if login.Data == nil {
     if login.password == "" {
@@ -37,7 +42,6 @@ func (login *Login) Decrypt(key []byte) (err error) {
     message, err = login.Data.Message(key)
     if err == nil {
       login.password = string(message)
-      login.Data = nil
     }
   }
   return

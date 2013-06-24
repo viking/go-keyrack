@@ -55,9 +55,6 @@ func TestLogin_Decrypt(t *testing.T) {
   if login.Password() != "secret" {
     t.Errorf("expected %v, got %v", "secret", login.Password())
   }
-  if login.Data != nil {
-    t.Errorf("didn't clear secret")
-  }
 }
 
 func TestLogin_Decrypt_Twice(t *testing.T) {
@@ -77,8 +74,20 @@ func TestLogin_Decrypt_Twice(t *testing.T) {
   if login.Password() != "secret" {
     t.Errorf("expected %v, got %v", "secret", login.Password())
   }
+}
+
+func TestLogin_SetPassword(t *testing.T) {
+  login := NewLogin("Twitter", "dude", "secret")
+  err := login.Encrypt([]byte("foo"))
+  if err != nil {
+    t.Error(err)
+  }
+  login.SetPassword("secretfoo")
+  if login.Password() != "secretfoo" {
+    t.Errorf("expected %v, got %v", "secretfoo", login.Password())
+  }
   if login.Data != nil {
-    t.Errorf("didn't clear secret")
+    t.Errorf("secret wasn't cleared")
   }
 }
 
