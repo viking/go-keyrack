@@ -24,14 +24,21 @@ func tempfile(t *testing.T, fn func (filename string)) {
     t.Error(err)
     return
   }
-  /*defer os.Remove(f.Name())*/
-  t.Log(f.Name())
 
   fn(f.Name())
+
+  if (t.Failed()) {
+    t.Log(f.Name())
+  } else {
+    os.Remove(f.Name())
+  }
 }
 
 func TestNewDatabase(t *testing.T) {
-  db := NewDatabase()
+  db, err := NewDatabase()
+  if err != nil {
+    t.Fatal(err)
+  }
   if db.Version != 1 {
     t.Errorf("expected %v, got %v", 1, db.Version)
   }
@@ -39,7 +46,7 @@ func TestNewDatabase(t *testing.T) {
 
 func TestLoadDatabase_EmptyFile(t *testing.T) {
   f := func (filename string) {
-    _, err := LoadDatabase(filename, "supersecret")
+    _, err := LoadDatabase(filename, []byte("supersecret"))
     if err == nil {
       t.Error("expected an error, but there wasn't one")
     }
@@ -51,20 +58,24 @@ func TestLoadDatabase_LoadValidFile(t *testing.T) {
   f := func(filename string) {
     var (err error; db, db2 *Database)
 
-    db = NewDatabase()
+    db, err = NewDatabase()
+    if err != nil {
+      t.Fatal(err)
+    }
     top := db.Top()
-    err = top.AddLogin("Twitter", "dude", "secret123", "supersecret")
+    err = top.AddLogin("Twitter", "dude", "secret123")
     if err != nil {
       t.Error(err)
       return
     }
-    err = db.Save(filename, "supersecret")
+    password := []byte("supersecret")
+    err = db.Save(filename, password)
     if err != nil {
       t.Error(err)
       return
     }
 
-    db2, err = LoadDatabase(filename, "supersecret")
+    db2, err = LoadDatabase(filename, password)
     if err != nil {
       t.Error(err)
       return
@@ -74,7 +85,7 @@ func TestLoadDatabase_LoadValidFile(t *testing.T) {
     }
     top2 := db2.Top()
     if !reflect.DeepEqual(top, top2) {
-      t.Errorf("expected %v, got %v", top, top2)
+      t.Errorf("expected %+v, got %+v", top, top2)
     }
   }
   tempfile(t, f)
@@ -84,24 +95,24 @@ func TestNewDatabase_WrongPassword(t *testing.T) {
   f := func(filename string) {
     var (err error; db *Database)
 
-    db = NewDatabase()
+    db, err = NewDatabase()
     if err != nil {
       t.Error(err)
       return
     }
     top := db.Top()
-    err = top.AddLogin("Twitter", "dude", "secret123", "supersecret")
+    err = top.AddLogin("Twitter", "dude", "secret123")
     if err != nil {
       t.Error(err)
       return
     }
-    err = db.Save(filename, "supersecret")
+    err = db.Save(filename, []byte("supersecret"))
     if err != nil {
       t.Error(err)
       return
     }
 
-    _, err = LoadDatabase(filename, "wrong")
+    _, err = LoadDatabase(filename, []byte("wrong"))
     if err == nil {
       t.Error("expected error, got none")
     } else if err.Error() != "invalid password" {
@@ -115,23 +126,23 @@ func TestDatabase_Save_WrongPassword(t *testing.T) {
   f := func(filename string) {
     var (err error; db *Database)
 
-    db = NewDatabase()
+    db, err = NewDatabase()
     if err != nil {
       t.Error(err)
       return
     }
     top := db.Top()
-    err = top.AddLogin("Twitter", "dude", "secret123", "supersecret")
+    err = top.AddLogin("Twitter", "dude", "secret123")
     if err != nil {
       t.Error(err)
       return
     }
-    err = db.Save(filename, "supersecret")
+    err = db.Save(filename, []byte("supersecret"))
     if err != nil {
       t.Error(err)
       return
     }
-    err = db.Save(filename, "wrong")
+    err = db.Save(filename, []byte("wrong"))
     if err == nil {
       t.Error("expected error, got none")
     } else if err.Error() != "invalid password" {

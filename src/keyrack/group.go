@@ -15,7 +15,7 @@ func NewGroup(name string) (group *Group) {
   return
 }
 
-func (group *Group) AddLogin(site, username, password, master string) (err error) {
+func (group *Group) AddLogin(site, username, password string) (err error) {
   var login *Login
 
   // First check to see if there is another login with the same site/username
@@ -26,10 +26,8 @@ func (group *Group) AddLogin(site, username, password, master string) (err error
     }
   }
 
-  login, err = NewLogin(site, username, password, master)
-  if err == nil {
-    group.Logins = append(group.Logins, login)
-  }
+  login = NewLogin(site, username, password)
+  group.Logins = append(group.Logins, login)
   return
 }
 

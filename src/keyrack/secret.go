@@ -19,7 +19,7 @@ type Secret struct {
   Ciphertext []byte
 }
 
-func NewSecret(message []byte, password string) (s *Secret, err error) {
+func NewSecret(message []byte, password []byte) (s *Secret, err error) {
   s = new(Secret)
 
   /* Generate salt */
@@ -46,7 +46,7 @@ func NewSecret(message []byte, password string) (s *Secret, err error) {
   }
 
   /* Calculate HMAC */
-  mac := hmac.New(sha256.New, []byte(password))
+  mac := hmac.New(sha256.New, password)
   mac.Write(s.Salt)
   mac.Write(s.IV)
   s.Sum = mac.Sum(nil)
@@ -78,15 +78,15 @@ func NewSecret(message []byte, password string) (s *Secret, err error) {
   return
 }
 
-func (s *Secret) IsPasswordValid(password string) bool {
-  mac := hmac.New(sha256.New, []byte(password))
+func (s *Secret) IsPasswordValid(password []byte) bool {
+  mac := hmac.New(sha256.New, password)
   mac.Write(s.Salt)
   mac.Write(s.IV)
   sum := mac.Sum(nil)
   return bytes.Equal(s.Sum, sum)
 }
 
-func (s *Secret) Message(password string) (message []byte, err error) {
+func (s *Secret) Message(password []byte) (message []byte, err error) {
   if !s.IsPasswordValid(password) {
     err = fmt.Errorf("invalid password")
     return
@@ -121,7 +121,7 @@ func (s *Secret) Message(password string) (message []byte, err error) {
   return
 }
 
-func (s *Secret) generateKey(password string) (key []byte, err error) {
-  key, err = scrypt.Key([]byte(password), s.Salt, 16384, 8, 1, 32)
+func (s *Secret) generateKey(password []byte) (key []byte, err error) {
+  key, err = scrypt.Key(password, s.Salt, 16384, 8, 1, 32)
   return
 }

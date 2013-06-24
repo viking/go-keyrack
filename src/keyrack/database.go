@@ -2,29 +2,46 @@ package keyrack
 
 import (
   "os"
+  "io"
   "io/ioutil"
   "fmt"
   "sync"
   "encoding/json"
+  "crypto/rand"
 )
 
 type Database struct {
   Version uint8
   Data *Secret
-  top *Group
+  private struct {
+    Top *Group
+    Key []byte
+  }
   mutex sync.Mutex
 }
 
-func NewDatabase() (db *Database) {
+func NewDatabase() (db *Database, err error) {
   db = &Database{Version: 1}
-  db.top = NewGroup("Top")
+
+  var n int
+  db.private.Key = make([]byte, 32)
+  n, err = io.ReadFull(rand.Reader, db.private.Key)
+  if err != nil {
+    return
+  }
+  if n != len(db.private.Key) {
+    err = fmt.Errorf("couldn't generate key")
+    return
+  }
+
+  db.private.Top = NewGroup("Top")
   return
 }
 
-func LoadDatabase(filename, password string) (db *Database, err error) {
+func LoadDatabase(filename string, password []byte) (db *Database, err error) {
   var (
     f *os.File
-    dbJSON, groupJSON []byte
+    dbJSON, privateJSON []byte
   )
 
   f, err = os.Open(filename)
@@ -42,21 +59,24 @@ func LoadDatabase(filename, password string) (db *Database, err error) {
   if err != nil {
     return
   }
-  groupJSON, err = db.Data.Message(password)
+  privateJSON, err = db.Data.Message(password)
   if err != nil {
     return
   }
-  db.top = new(Group)
-  err = json.Unmarshal(groupJSON, db.top)
+  err = json.Unmarshal(privateJSON, &db.private)
 
   return
 }
 
-func (db *Database) Top() *Group {
-  return db.top
+func (db *Database) Key() []byte {
+  return db.private.Key
 }
 
-func (db *Database) Save(filename, password string) (err error) {
+func (db *Database) Top() *Group {
+  return db.private.Top
+}
+
+func (db *Database) Save(filename string, password []byte) (err error) {
   db.mutex.Lock()
   defer db.mutex.Unlock()
 
@@ -65,14 +85,17 @@ func (db *Database) Save(filename, password string) (err error) {
     return
   }
 
+  /* Encrypt all the logins */
+  db.encryptLogins(db.private.Top)
+
   /* Serialize group to JSON and encrypt */
-  var groupJSON []byte
-  groupJSON, err = json.Marshal(db.top)
+  var privateJSON []byte
+  privateJSON, err = json.Marshal(db.private)
   if err != nil {
     return
   }
 
-  db.Data, err = NewSecret(groupJSON, password)
+  db.Data, err = NewSecret(privateJSON, password)
   if err != nil {
     return
   }
@@ -102,5 +125,21 @@ func (db *Database) Save(filename, password string) (err error) {
     return
   }
 
+  return
+}
+
+func (db *Database) encryptLogins(group *Group) (err error) {
+  for _, login := range group.Logins {
+    err = login.Encrypt(db.private.Key)
+    if err != nil {
+      return
+    }
+  }
+  for _, subgroup := range group.Groups {
+    err = db.encryptLogins(subgroup)
+    if err != nil {
+      return
+    }
+  }
   return
 }

@@ -13,7 +13,7 @@ func TestGroup_AddLogin(t *testing.T) {
   )
 
   group = NewGroup("Foo")
-  err = group.AddLogin("Twitter", "dude", "secret", "foo")
+  err = group.AddLogin("Twitter", "dude", "secret")
   if err != nil {
     t.Fatal(err)
   }
@@ -28,11 +28,7 @@ func TestGroup_AddLogin(t *testing.T) {
     if login.Username != "dude" {
       t.Errorf("expected %v, got %v", "dude", login.Username)
     }
-    password, err = login.PasswordString("foo")
-    if err != nil {
-      t.Error(err)
-    }
-    if password != "secret" {
+    if login.password != "secret" {
       t.Errorf("expected %v, got %v", "secret", password)
     }
   }
@@ -45,11 +41,11 @@ func TestGroup_AddLogin_Duplicate(t *testing.T) {
   )
 
   group = NewGroup("Foo")
-  err = group.AddLogin("Twitter", "dude", "secret", "foo")
+  err = group.AddLogin("Twitter", "dude", "secret")
   if err != nil {
     t.Fatal(err)
   }
-  err = group.AddLogin("Twitter", "dude", "secret", "foo")
+  err = group.AddLogin("Twitter", "dude", "secret")
   if err == nil {
     t.Error("expected an error, but there wasn't one")
   }

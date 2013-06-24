@@ -1,22 +1,44 @@
 package keyrack
 
+import "fmt"
+
 type Login struct {
   Site string
   Username string
-  Password *Secret
+  Data *Secret
+  password string
 }
 
-func NewLogin(site, username, password, master string) (login *Login, err error) {
-  login = &Login{Site: site, Username: username}
-  login.Password, err = NewSecret([]byte(password), master)
+func NewLogin(site, username, password string) *Login {
+  return &Login{Site: site, Username: username, password: password}
+}
+
+func (login *Login) Password() string {
+  return login.password
+}
+
+func (login *Login) Encrypt(key []byte) (err error) {
+  if login.Data == nil {
+    if login.password == "" {
+      err = fmt.Errorf("can't encrypt empty password")
+      return
+    }
+    login.Data, err = NewSecret([]byte(login.password), key)
+    if err == nil {
+      login.password = ""
+    }
+  }
   return
 }
 
-func (login *Login) PasswordString(master string) (password string, err error) {
-  var message []byte
-  message, err = login.Password.Message(master)
-  if err == nil {
-    password = string(message)
+func (login *Login) Decrypt(key []byte) (err error) {
+  if login.Data != nil {
+    var message []byte
+    message, err = login.Data.Message(key)
+    if err == nil {
+      login.password = string(message)
+      login.Data = nil
+    }
   }
   return
 }
