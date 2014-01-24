@@ -25,6 +25,7 @@ func indexWidth(group *keyrack.Group) int {
 	return int(math.Floor(math.Log10(float64(max))))
 }
 
+// print a group menu
 func printMenu(group *keyrack.Group) {
 	fmt.Printf("=== %s\n", group.Name)
 
@@ -41,17 +42,20 @@ func printMenu(group *keyrack.Group) {
 	fmt.Println("Commands: new save quit")
 }
 
+// read input from user
 func getInput(prompt string) (command string, err error) {
 	fmt.Printf("%s ", prompt)
 	_, err = fmt.Scanf("%s", &command)
 	return
 }
 
+// read password from user
 func getPassword() []byte {
 	fmt.Printf("Password: ")
 	return gopass.GetPasswd()
 }
 
+// add login to group
 func newLogin(group *keyrack.Group) (err error) {
 	var site, username, password string
 
@@ -80,12 +84,7 @@ func newLogin(group *keyrack.Group) (err error) {
 	return
 }
 
-type UI struct {
-	db       *keyrack.Database
-	filename string
-}
-
-func (ui *UI) menu(group *keyrack.Group) (quit bool, err error) {
+func menu(session *Session, group *keyrack.Group) (quit bool, err error) {
 	for !quit && err == nil {
 		printMenu(group)
 
@@ -103,7 +102,7 @@ func (ui *UI) menu(group *keyrack.Group) (quit bool, err error) {
 
 			case "save":
 				password := getPassword()
-				err = ui.db.Save(ui.filename, password)
+				err = session.db.Save(session.filename, password)
 				if err != nil {
 					if err == keyrack.ErrInvalidPassword {
 						fmt.Println("Error:", err)

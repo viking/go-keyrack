@@ -6,6 +6,11 @@ import (
 	"os"
 )
 
+type Session struct {
+	db       *keyrack.Database
+	filename string
+}
+
 func main() {
 	var (
 		filename string
@@ -32,8 +37,8 @@ func main() {
 	}
 
 	if err == nil {
-		ui := &UI{db, filename}
-		_, err = ui.menu(db.Top())
+		session := &Session{db, filename}
+		_, err = menu(session, db.Top())
 	}
 
 	if err != nil {
