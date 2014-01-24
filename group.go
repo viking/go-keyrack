@@ -8,7 +8,10 @@ type Group struct {
 	Groups GroupList
 }
 
-var ErrLoginExists = fmt.Errorf("there is already a login with the same site/username")
+var (
+	ErrLoginExists = fmt.Errorf("there is already a login with the same site/username")
+	ErrGroupExists = fmt.Errorf("there is already a group with the same name")
+)
 
 func NewGroup(name string) (group *Group) {
 	group = &Group{Name: name}
@@ -38,7 +41,7 @@ func (group *Group) AddGroup(name string) (err error) {
 
 	for _, subgroup = range group.Groups {
 		if subgroup.Name == name {
-			err = fmt.Errorf("there is already a group with the same name")
+			err = ErrGroupExists
 			return
 		}
 	}

@@ -130,6 +130,11 @@ func (db *Database) Save(filename string, password []byte) (err error) {
 	return
 }
 
+func (db *Database) DecryptLogin(login *Login) (err error) {
+	err = login.Decrypt(db.private.Key)
+	return
+}
+
 func (db *Database) encryptLogins(group *Group) (err error) {
 	for _, login := range group.Logins {
 		err = login.Encrypt(db.private.Key)
