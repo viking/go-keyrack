@@ -14,6 +14,7 @@ type Session struct {
 func main() {
 	var (
 		filename string
+		password string
 		db       *keyrack.Database
 		err      error
 	)
@@ -27,13 +28,13 @@ func main() {
 	if _, err = os.Stat(filename); os.IsNotExist(err) {
 		db, err = keyrack.NewDatabase()
 	} else {
-		password := getPassword()
-		db, err = keyrack.LoadDatabase(os.Args[1], password)
-
-		// scrub password
-		for i := range password {
-			password[i] = 0
+		password, err = getInput("Password:", false)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
+		db, err = keyrack.LoadDatabase(os.Args[1], []byte(password))
+		password = ""
 	}
 
 	if err == nil {

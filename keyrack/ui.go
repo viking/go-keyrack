@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/howeyc/gopass"
 	"github.com/viking/keyrack"
 	"math"
 	"strconv"
+	"strings"
 )
 
 // return the character width of the maximum index
@@ -44,39 +44,41 @@ func printMenu(group *keyrack.Group) {
 }
 
 // read input from user
-func getInput(prompt string) (command string, err error) {
-	fmt.Printf("%s ", prompt)
-	_, err = fmt.Scanf("%s", &command)
+func getInput(prompt string, echo bool) (input string, err error) {
+	if len(prompt) > 0 {
+		fmt.Printf("%s ", prompt)
+	}
+	if echo {
+		_, err = fmt.Scanf("%s", &input)
+	} else {
+		input = string(GetPasswd())
+	}
 	return
-}
-
-// read password from user
-func getPassword() []byte {
-	fmt.Printf("Password: ")
-	return gopass.GetPasswd()
 }
 
 // print password from login
 func printPassword(password string) {
-	fmt.Println(password)
+	fmt.Printf("%s\r", password)
+	getch()
+	fmt.Println(strings.Repeat(" ", len(password)))
 }
 
 // add login to group
 func newLogin(group *keyrack.Group) (err error) {
 	var site, username, password string
 
-	site, err = getInput("Site:")
+	site, err = getInput("Site:", true)
 	if err != nil || site == "" {
 		return
 	}
 
-	username, err = getInput("Username:")
+	username, err = getInput("Username:", true)
 	if err != nil || username == "" {
 		return
 	}
 
-	password = string(getPassword())
-	if password == "" {
+	password, err = getInput("Password:", false)
+	if err != nil || password == "" {
 		return
 	}
 
@@ -94,7 +96,7 @@ func newLogin(group *keyrack.Group) (err error) {
 func newGroup(group *keyrack.Group) (err error) {
 	var name string
 
-	name, err = getInput("Name:")
+	name, err = getInput("Name:", true)
 	if err != nil || name == "" {
 		return
 	}
@@ -117,7 +119,7 @@ func menu(session *Session, group *keyrack.Group) (quit bool, err error) {
 		up := false
 		for ok := false; !ok && err == nil; {
 			var command string
-			command, err = getInput("?")
+			command, err = getInput("?", true)
 			if err != nil {
 				return
 			}
@@ -134,12 +136,15 @@ func menu(session *Session, group *keyrack.Group) (quit bool, err error) {
 				up = true
 
 			case "save":
-				password := getPassword()
-				err = session.db.Save(session.filename, password)
-				if err != nil {
-					if err == keyrack.ErrInvalidPassword {
-						fmt.Println("Error:", err)
-						err = nil
+				var password string
+				password, err = getInput("Password:", false)
+				if err == nil {
+					err = session.db.Save(session.filename, []byte(password))
+					if err != nil {
+						if err == keyrack.ErrInvalidPassword {
+							fmt.Println("Error:", err)
+							err = nil
+						}
 					}
 				}
 
