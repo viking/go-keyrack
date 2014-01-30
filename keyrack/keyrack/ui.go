@@ -44,12 +44,13 @@ func printMenu(group *keyrack.Group) {
 }
 
 // read input from user
-func getInput(prompt string, echo bool) (input string, err error) {
+func getInput(prompt string, echo bool) (input string) {
 	if len(prompt) > 0 {
 		fmt.Printf("%s ", prompt)
 	}
+
 	if echo {
-		_, err = fmt.Scanf("%s", &input)
+		fmt.Scanf("%s", &input)
 	} else {
 		input = string(GetPasswd())
 	}
@@ -67,18 +68,18 @@ func printPassword(password string) {
 func newLogin(group *keyrack.Group) (err error) {
 	var site, username, password string
 
-	site, err = getInput("Site:", true)
-	if err != nil || site == "" {
+	site = getInput("Site:", true)
+	if site == "" {
 		return
 	}
 
-	username, err = getInput("Username:", true)
-	if err != nil || username == "" {
+	username = getInput("Username:", true)
+	if username == "" {
 		return
 	}
 
-	password, err = getInput("Password:", false)
-	if err != nil || password == "" {
+	password = getInput("Password:", false)
+	if password == "" {
 		return
 	}
 
@@ -96,8 +97,8 @@ func newLogin(group *keyrack.Group) (err error) {
 func newGroup(group *keyrack.Group) (err error) {
 	var name string
 
-	name, err = getInput("Name:", true)
-	if err != nil || name == "" {
+	name = getInput("Name:", true)
+	if name == "" {
 		return
 	}
 
@@ -119,10 +120,7 @@ func menu(session *Session, group *keyrack.Group) (quit bool, err error) {
 		up := false
 		for ok := false; !ok && err == nil; {
 			var command string
-			command, err = getInput("?", true)
-			if err != nil {
-				return
-			}
+			command = getInput("?", true)
 
 			ok = true
 			switch command {
@@ -136,20 +134,20 @@ func menu(session *Session, group *keyrack.Group) (quit bool, err error) {
 				up = true
 
 			case "save":
-				var password string
-				password, err = getInput("Password:", false)
-				if err == nil {
-					err = session.db.Save(session.filename, []byte(password))
-					if err != nil {
-						if err == keyrack.ErrInvalidPassword {
-							fmt.Println("Error:", err)
-							err = nil
-						}
+				password := getInput("Password:", false)
+				err = session.db.Save(session.filename, []byte(password))
+				if err != nil {
+					if err == keyrack.ErrInvalidPassword {
+						fmt.Println("Error:", err)
+						err = nil
 					}
 				}
 
 			case "quit":
 				quit = true
+
+			case "":
+				ok = false
 
 			default:
 				var i int

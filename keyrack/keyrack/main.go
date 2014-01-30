@@ -28,11 +28,7 @@ func main() {
 	if _, err = os.Stat(filename); os.IsNotExist(err) {
 		db, err = keyrack.NewDatabase()
 	} else {
-		password, err = getInput("Password:", false)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		password = getInput("Password:", false)
 		db, err = keyrack.LoadDatabase(os.Args[1], []byte(password))
 		password = ""
 	}
