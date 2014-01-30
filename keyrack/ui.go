@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/howeyc/gopass"
-	"keyrack"
+	"github.com/viking/keyrack"
 	"math"
 	"strconv"
 )

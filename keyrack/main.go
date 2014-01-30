@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"keyrack"
+	"github.com/viking/keyrack"
 	"os"
 )
 
