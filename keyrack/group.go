@@ -51,6 +51,14 @@ func (group *Group) AddGroup(name string) (err error) {
 	return
 }
 
+func (group *Group) Encrypt(key []byte) (err error) {
+	err = group.Logins.Encrypt(key)
+	if err == nil {
+		err = group.Groups.Encrypt(key)
+	}
+	return
+}
+
 type GroupList []*Group
 
 func (list GroupList) Len() int {
@@ -63,4 +71,14 @@ func (list GroupList) Less(i, j int) bool {
 
 func (list GroupList) Swap(i, j int) {
 	list[i], list[j] = list[j], list[i]
+}
+
+func (list GroupList) Encrypt(key []byte) (err error) {
+	for _, group := range list {
+		err = group.Encrypt(key)
+		if err != nil {
+			break
+		}
+	}
+	return
 }

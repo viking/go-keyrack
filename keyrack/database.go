@@ -42,8 +42,9 @@ func NewDatabase() (db *Database, err error) {
 
 func LoadDatabase(filename string, password []byte) (db *Database, err error) {
 	var (
-		f                   *os.File
-		dbJSON, privateJSON []byte
+		f           *os.File
+		dbJSON      []byte
+		privateJSON []byte
 	)
 
 	f, err = os.Open(filename)
@@ -88,9 +89,12 @@ func (db *Database) Save(filename string, password []byte) (err error) {
 	}
 
 	/* Encrypt all the logins */
-	db.encryptLogins(db.private.Top)
+	err = db.private.Top.Encrypt(db.private.Key)
+	if err != nil {
+		return
+	}
 
-	/* Serialize group to JSON and encrypt */
+	/* Serialize private data to JSON and encrypt */
 	var privateJSON []byte
 	privateJSON, err = json.Marshal(db.private)
 	if err != nil {
@@ -130,23 +134,12 @@ func (db *Database) Save(filename string, password []byte) (err error) {
 	return
 }
 
-func (db *Database) DecryptLogin(login *Login) (err error) {
-	err = login.Decrypt(db.private.Key)
+func (db *Database) EncryptLogin(login *Login) (err error) {
+	err = login.Encrypt(db.private.Key)
 	return
 }
 
-func (db *Database) encryptLogins(group *Group) (err error) {
-	for _, login := range group.Logins {
-		err = login.Encrypt(db.private.Key)
-		if err != nil {
-			return
-		}
-	}
-	for _, subgroup := range group.Groups {
-		err = db.encryptLogins(subgroup)
-		if err != nil {
-			return
-		}
-	}
+func (db *Database) DecryptLogin(login *Login) (err error) {
+	err = login.Decrypt(db.private.Key)
 	return
 }

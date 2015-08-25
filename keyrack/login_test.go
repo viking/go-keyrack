@@ -152,3 +152,26 @@ func TestLoginList_Swap(t *testing.T) {
 		t.Error("the values weren't swapped")
 	}
 }
+
+func TestLoginList_Encrypt(t *testing.T) {
+	login_1 := NewLogin("Twitter", "dude", "secret")
+	login_2 := NewLogin("Facebook", "foo@example.com", "password")
+	list := LoginList{login_1, login_2}
+	err := list.Encrypt([]byte("foo"))
+
+	if err != nil {
+		t.Error(err)
+	}
+	if login_1.Password() != "" {
+		t.Error("password 1 wasn't cleared")
+	}
+	if login_1.Data == nil {
+		t.Error("secret 1 wasn't created")
+	}
+	if login_2.Password() != "" {
+		t.Error("password 2 wasn't cleared")
+	}
+	if login_2.Data == nil {
+		t.Error("secret 2 wasn't created")
+	}
+}

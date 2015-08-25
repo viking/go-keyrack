@@ -69,3 +69,13 @@ func (list LoginList) Less(i, j int) bool {
 func (list LoginList) Swap(i, j int) {
 	list[i], list[j] = list[j], list[i]
 }
+
+func (list LoginList) Encrypt(key []byte) (err error) {
+	for _, login := range list {
+		err = login.Encrypt(key)
+		if err != nil {
+			break
+		}
+	}
+	return
+}

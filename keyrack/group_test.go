@@ -82,6 +82,37 @@ func TestGroup_AddGroup_Duplicate(t *testing.T) {
 	}
 }
 
+func TestGroup_Encrypt(t *testing.T) {
+	var (
+		group    *Group
+		subgroup *Group
+		logins   LoginList
+		login    *Login
+		err      error
+	)
+
+	group = NewGroup("Foo")
+	group.AddLogin("Twitter", "dude", "secret")
+	group.AddGroup("Bar")
+	subgroup = group.Groups[0]
+	subgroup.AddLogin("Facebook", "bro", "kermit")
+
+	err = group.Encrypt([]byte("foo"))
+	if err != nil {
+		t.Error(err)
+	} else {
+		logins = []*Login{group.Logins[0], subgroup.Logins[0]}
+		for _, login = range logins {
+			if login.Password() != "" {
+				t.Error("password wasn't cleared")
+			}
+			if login.Data == nil {
+				t.Error("secret wasn't created")
+			}
+		}
+	}
+}
+
 func TestGroupList_Len(t *testing.T) {
 	list := GroupList{NewGroup("Foo")}
 	if list.Len() != 1 {
