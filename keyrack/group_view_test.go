@@ -1,6 +1,7 @@
 package keyrack
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -11,8 +12,8 @@ func TestGroupView_Render_NoLogins(t *testing.T) {
 	view := GroupView{group}
 	result, err := view.Render()
 	if err == nil {
-		expected := "Group blah\n\nG0. foo\nG1. bar\n"
-		if result != expected {
+		expected := []byte("Group blah\n\nG0. foo\nG1. bar\n")
+		if !bytes.Equal(result, expected) {
 			t.Errorf("expected <%+v>, got <%+v>", []byte(expected), []byte(result))
 		}
 	} else {
@@ -27,8 +28,8 @@ func TestGroupView_Render_NoGroups(t *testing.T) {
 	view := GroupView{group}
 	result, err := view.Render()
 	if err == nil {
-		expected := "Group blah\n\nL0. foo (bro)\nL1. bar (dude)\n"
-		if result != expected {
+		expected := []byte("Group blah\n\nL0. foo (bro)\nL1. bar (dude)\n")
+		if !bytes.Equal(result, expected) {
 			t.Errorf("expected <%+v>, got <%+v>", []byte(expected), []byte(result))
 		}
 	} else {

@@ -40,7 +40,7 @@ func (gv GroupView) Logins() (result []GroupViewLogin) {
 	return
 }
 
-func (gv GroupView) Render() (result string, err error) {
+func (gv GroupView) Render() (result []byte, err error) {
 	tmpl, err := template.New("group").Parse(GroupTemplate)
 	if err != nil {
 		return
@@ -53,6 +53,6 @@ func (gv GroupView) Render() (result string, err error) {
 		return
 	}
 
-	result = string(writer.Bytes())
+	result = writer.Bytes()
 	return
 }
