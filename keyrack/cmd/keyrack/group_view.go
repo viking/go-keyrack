@@ -1,14 +1,15 @@
-package keyrack
+package main
 
 import (
 	"bytes"
+	"github.com/viking/go-keyrack/keyrack"
 	"text/template"
 )
 
 var GroupTemplate string = "Group {{.Name}}\n\n{{range .Groups}}G{{.Index}}. {{.Name}}\n{{end}}{{range .Logins}}L{{.Index}}. {{.Site}} ({{.Username}})\n{{end}}"
 
 type GroupView struct {
-	Group *Group
+	Group *keyrack.Group
 }
 
 func (gv GroupView) Name() string {

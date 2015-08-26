@@ -38,7 +38,7 @@ func main() {
 		termio   TermIO
 		group    *keyrack.Group
 		//trail     []*keyrack.Group
-		groupView keyrack.GroupView
+		groupView GroupView
 		matched   bool
 		quit      bool
 		err       error

@@ -1,12 +1,13 @@
-package keyrack
+package main
 
 import (
 	"bytes"
+	"github.com/viking/go-keyrack/keyrack"
 	"testing"
 )
 
 func TestGroupView_Render_NoLogins(t *testing.T) {
-	group := NewGroup("blah")
+	group := keyrack.NewGroup("blah")
 	group.AddGroup("foo")
 	group.AddGroup("bar")
 	view := GroupView{group}
@@ -22,7 +23,7 @@ func TestGroupView_Render_NoLogins(t *testing.T) {
 }
 
 func TestGroupView_Render_NoGroups(t *testing.T) {
-	group := NewGroup("blah")
+	group := keyrack.NewGroup("blah")
 	group.AddLogin("foo", "bro", "secret")
 	group.AddLogin("bar", "dude", "secret")
 	view := GroupView{group}
